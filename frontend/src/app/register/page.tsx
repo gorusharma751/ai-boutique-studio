@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Loader2, Sparkles, Store, User } from 'lucide-react';
@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { authApi } from '@/lib/api';
 import useAuthStore from '@/store/authStore';
 
-export default function RegisterPage() {
+function RegisterContent() {
   const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' });
   const [role, setRole] = useState<'customer' | 'owner'>('customer');
   const [showPass, setShowPass] = useState(false);
@@ -175,3 +175,16 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <RegisterContent />
+    </Suspense>
+  );
+}
+
