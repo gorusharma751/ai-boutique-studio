@@ -13,7 +13,7 @@ function RegisterContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
-  
+
   const [role, setRole] = useState<'customer' | 'owner'>('customer');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -59,7 +59,7 @@ function RegisterContent() {
     script.onload = () => initGoogle();
     document.body.appendChild(script);
     return () => { document.body.removeChild(script); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -104,9 +104,8 @@ function RegisterContent() {
                 key={r.value}
                 type="button"
                 onClick={() => setRole(r.value as any)}
-                className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-4 text-center transition-all ${
-                  role === r.value ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'
-                }`}
+                className={`flex flex-col items-center gap-1.5 rounded-xl border-2 p-4 text-center transition-all ${role === r.value ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'
+                  }`}
               >
                 <r.icon className={`h-5 w-5 ${role === r.value ? 'text-primary' : 'text-muted-foreground'}`} />
                 <p className={`text-sm font-medium ${role === r.value ? 'text-primary' : ''}`}>{r.label}</p>
@@ -136,7 +135,7 @@ function RegisterContent() {
                 required
               />
             </div>
-            
+
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Email</label>
               <input
