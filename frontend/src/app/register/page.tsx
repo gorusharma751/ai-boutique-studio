@@ -9,7 +9,11 @@ import { authApi } from '@/lib/api';
 import useAuthStore from '@/store/authStore';
 
 function RegisterContent() {
-  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' });
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  
   const [role, setRole] = useState<'customer' | 'owner'>('customer');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,27 +25,6 @@ function RegisterContent() {
     const r = searchParams.get('role');
     if (r === 'owner') setRole('owner');
   }, [searchParams]);
-
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.onload = () => initGoogle();
-    document.body.appendChild(script);
-    return () => { document.body.removeChild(script); };
-  }, []);
-
-  const initGoogle = () => {
-    if (!(window as any).google) return;
-    (window as any).google.accounts.id.initialize({
-      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      callback: handleGoogleRegister
-    });
-    (window as any).google.accounts.id.renderButton(
-      document.getElementById('google-reg-btn'),
-      { theme: 'outline', size: 'large', width: '100%', text: 'signup_with' }
-    );
-  };
 
   const handleGoogleRegister = async (response: any) => {
     try {
@@ -57,12 +40,34 @@ function RegisterContent() {
     }
   };
 
+  const initGoogle = () => {
+    if (!(window as any).google) return;
+    (window as any).google.accounts.id.initialize({
+      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      callback: handleGoogleRegister
+    });
+    (window as any).google.accounts.id.renderButton(
+      document.getElementById('google-reg-btn'),
+      { theme: 'outline', size: 'large', width: '100%', text: 'signup_with' }
+    );
+  };
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.onload = () => initGoogle();
+    document.body.appendChild(script);
+    return () => { document.body.removeChild(script); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.password.length < 8) return toast.error('Password must be at least 8 characters');
+    if (password.length < 8) return toast.error('Password must be at least 8 characters');
     try {
       setLoading(true);
-      const res = await authApi.register({ ...form, role });
+      const res = await authApi.register({ name, email, password, phone, role });
       setAuth(res.data.user, res.data.token);
       toast.success('Welcome to AI Boutique Studio!');
       router.replace(role === 'owner' ? '/owner' : '/customer');
@@ -90,7 +95,6 @@ function RegisterContent() {
         </div>
 
         <div className="rounded-2xl border bg-card shadow-sm p-8 space-y-5">
-          {/* Role selector */}
           <div className="grid grid-cols-2 gap-3">
             {[
               { value: 'customer', label: 'Customer', icon: User, desc: 'Shop & Try-On' },
@@ -111,7 +115,6 @@ function RegisterContent() {
             ))}
           </div>
 
-          {/* Google button */}
           <div id="google-reg-btn" className="w-full min-h-[44px] flex justify-center" />
 
           <div className="relative">
@@ -122,30 +125,48 @@ function RegisterContent() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {[
-              { key: 'name', label: 'Full Name', type: 'text', placeholder: 'Priya Sharma' },
-              { key: 'email', label: 'Email', type: 'email', placeholder: 'you@example.com' },
-              { key: 'phone', label: 'Phone (optional)', type: 'tel', placeholder: '+91 98765 43210' },
-            ].map(f => (
-              <div key={f.key} className="space-y-1.5">
-                <label className="text-sm font-medium">{f.label}</label>
-                <input
-                  type={f.type}
-                  value={form[f.key as keyof typeof form]}
-                  onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
-                  placeholder={f.placeholder}
-                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all"
-                  required={f.key !== 'phone'}
-                />
-              </div>
-            ))}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Full Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Priya Sharma"
+                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                required
+              />
+            </div>
+            
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Phone (optional)</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                placeholder="+91 98765 43210"
+                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+              />
+            </div>
+
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Password</label>
               <div className="relative">
                 <input
                   type={showPass ? 'text' : 'password'}
-                  value={form.password}
-                  onChange={e => setForm(prev => ({ ...prev, password: e.target.value }))}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
                   placeholder="Min. 8 characters"
                   className="w-full rounded-lg border bg-background px-3 py-2.5 pr-10 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all"
                   required
@@ -187,4 +208,3 @@ export default function RegisterPage() {
     </Suspense>
   );
 }
-

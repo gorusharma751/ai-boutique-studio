@@ -25,15 +25,18 @@ function LoginContent() {
     }
   }, [isAuthenticated, user, redirect, router]);
 
-  // Load Google SDK
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.onload = () => initGoogle();
-    document.body.appendChild(script);
-    return () => { document.body.removeChild(script); };
-  }, []);
+  const handleGoogleLogin = async (response: any) => {
+    try {
+      setLoading(true);
+      const res = await authApi.googleLogin(response.credential);
+      setAuth(res.data.user, res.data.token);
+      toast.success('Welcome back!');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Google login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const initGoogle = () => {
     if (!(window as any).google) return;
@@ -47,18 +50,15 @@ function LoginContent() {
     );
   };
 
-  const handleGoogleLogin = async (response: any) => {
-    try {
-      setLoading(true);
-      const res = await authApi.googleLogin(response.credential);
-      setAuth(res.data.user, res.data.token);
-      toast.success('Welcome back!');
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Google login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.onload = () => initGoogle();
+    document.body.appendChild(script);
+    return () => { document.body.removeChild(script); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +80,6 @@ function LoginContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 px-4 py-12">
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
             <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
@@ -94,9 +93,7 @@ function LoginContent() {
           <p className="text-muted-foreground mt-1">Sign in to your account</p>
         </div>
 
-        {/* Card */}
         <div className="rounded-2xl border bg-card shadow-sm p-8 space-y-5">
-          {/* Google button */}
           <div id="google-btn" className="w-full min-h-[44px] flex justify-center" />
 
           <div className="relative">
@@ -178,4 +175,3 @@ export default function LoginPage() {
     </Suspense>
   );
 }
-
