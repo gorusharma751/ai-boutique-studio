@@ -49,12 +49,16 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // Health check
-app.get('/health', async (req, res) => {
+app.get(['/health', '/api/health'], async (req, res) => {
   try {
+    // If database connection is not established yet, handle gracefully
+    if (!pool) {
+       return res.json({ status: 'healthy', timestamp: new Date().toISOString(), db: 'local/sqlite' });
+    }
     await pool.query('SELECT 1');
     res.json({ status: 'healthy', timestamp: new Date().toISOString(), db: 'connected' });
   } catch (err) {
-    res.status(503).json({ status: 'unhealthy', db: 'disconnected' });
+    res.status(503).json({ status: 'unhealthy', db: 'disconnected', error: err.message });
   }
 });
 
@@ -99,9 +103,10 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   logger.info(`🚀 AI Boutique Studio API running on port ${PORT}`);
   logger.info(`Environment: ${process.env.NODE_ENV}`);
+  logger.info(`Database URI: ${process.env.DATABASE_URL ? 'Configured' : 'Missing'}`);
 });
 
 module.exports = app;
