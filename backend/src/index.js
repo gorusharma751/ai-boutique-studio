@@ -48,6 +48,15 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('combined', { stream: { write: msg => logger.info(msg.trim()) } }));
 }
 
+// Welcome route
+app.get('/', (req, res) => {
+  res.json({ 
+    message: '🚀 AI Boutique Studio API is Live!', 
+    docs: 'Check /api/health for system status',
+    version: '1.0.0' 
+  });
+});
+
 // Health check
 app.get(['/health', '/api/health'], async (req, res) => {
   try {
