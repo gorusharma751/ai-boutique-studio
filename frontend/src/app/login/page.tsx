@@ -23,7 +23,7 @@ function LoginContent() {
       const dest = redirect || (user.role === 'admin' ? '/admin' : user.role === 'owner' ? '/owner' : '/customer');
       router.replace(dest);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, redirect, router]);
 
   // Load Google SDK
   useEffect(() => {

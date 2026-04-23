@@ -131,7 +131,7 @@ function RegisterContent() {
                 <label className="text-sm font-medium">{f.label}</label>
                 <input
                   type={f.type}
-                  value={(form as any)[f.key]}
+                  value={form[f.key as keyof typeof form]}
                   onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
                   placeholder={f.placeholder}
                   className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/30 transition-all"
